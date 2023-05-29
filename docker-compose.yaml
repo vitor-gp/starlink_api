@@ -1,0 +1,42 @@
+version: '3'
+
+services:
+  postgres:
+    image: postgres:latest
+    ports:
+      - '5432:5432'
+    restart: always
+    volumes:
+      - ./database/entrypoint:/docker-entrypoint-initdb.d
+    environment:
+      &postgres-common-env
+      POSTGRES_HOST: postgres
+      POSTGRES_PORT: 5432
+      POSTGRES_DB: starlink
+      POSTGRES_USER: blueonion
+      POSTGRES_PASSWORD: labs
+    healthcheck:
+      test: ["CMD", "pg_isready", "-q", "-d", "starlink", "-U", "blueonion"]
+      interval: 1s
+      retries: 30
+
+  import-script:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - postgres
+    environment:
+      <<: *postgres-common-env
+    entrypoint: ["sh", "-c", "sleep 10 && python database/import_data.py"]
+
+  graphql-api:
+    build:
+      context: .
+      dockerfile: Dockerfile
+    depends_on:
+      - import-script
+    ports:
+      - '5000:5000'
+    environment:
+      <<: *postgres-common-env
