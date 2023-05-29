@@ -8,8 +8,8 @@ This project provides a GraphQL API to query the last known position of Starlink
 
    ```
    docker-compose up -d
-   ```I apologize for missing that part. Here's the updated section for the Usage part of the readme:
-
+   ```
+ 
 ## Usage
 
 1. Check the logs and find the message of the import script.
